@@ -38,7 +38,7 @@ func main() {
 	portMap["8888/tcp"] = []nat.PortBinding{
 		{
 			HostIP:   "0.0.0.0",
-			HostPort: "28888",
+			HostPort: "0", // 随机分配
 		},
 	}
 	createResp, err := cli.ContainerCreate(ctx, &container.Config{
