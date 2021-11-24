@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func main() {
+func Inspect() {
 	cli, err := client.NewClientWithOpts(client.WithHost("tcp://127.0.0.1:2375"))
 	if err != nil {
 		panic(err)

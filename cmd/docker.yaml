@@ -1,0 +1,30 @@
+containers:
+  - name: host-agent
+    image: {{harbor.hyperchain.cn/platform/blocface/hostagent:develop}}
+    resources:
+      request:
+        cpu: "100m"
+        memory: "100Mi"
+      limits:
+        cpu: "100m"
+        memory: "500Mi"
+      env:
+        - name: MachineID
+          value: "{{machineID}}"
+        - name: ENV_TYPE
+          value: "{{.EnvType}}"
+        - name: AgentID
+          value: "{{AgentUUID}}"
+        - name: CORE_ADDR
+          value: {{coreAddr}}
+        - name: COREWS
+          value: {{coreWSAddr}}
+        - name: Pushgateway
+          value: {{Pushgateway}}
+        - name: Logger
+          value: {{Logger}}
+        - name: LoggerWS
+          value: {{LoggerWS}}
+    ports:
+      - containerPort: 9009
+        protocol: tcp

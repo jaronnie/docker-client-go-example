@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"bytes"
@@ -13,7 +13,7 @@ import (
 reference: https://blog.csdn.net/q1403539144/article/details/115967275
  */
 
-func main() {
+func Exec() {
 	cli, err := client.NewClientWithOpts(client.WithHost("tcp://127.0.0.1:2375"))
 	if err != nil {
 		panic(err)

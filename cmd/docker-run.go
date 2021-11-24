@@ -1,19 +1,62 @@
-package main
+package cmd
 
 import (
 	"context"
 	"fmt"
-	"github.com/docker/distribution/uuid"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"io"
+	"math/rand"
 	"os"
 	"time"
 )
 
-func main() {
+var DockerYAML = `
+name: host-agent
+image: gocloudcoder/kube-image-pull:develop
+resources:
+  request:
+    cpu: "100m"
+    memory: "100Mi"
+  limits:
+    cpu: "100m"
+    memory: "500Mi"
+  env:
+    - name: MachineID
+      value: machineID
+    - name: ENV_TYPE
+      value: EnvType
+    - name: AgentID
+      value: AgentUUID
+    - name: CORE_ADDR
+      value: coreAddr
+    - name: COREWS
+      value: coreWSAddr
+    - name: Pushgateway
+      value: Pushgateway
+    - name: Logger
+      value: Logger
+    - name: LoggerWS
+      value: LoggerWS 
+ports:
+  - containerPort: 9009
+    protocol: tcp  
+`
+
+type Config struct {
+	Resources
+
+	Name string
+	Image string
+
+}
+
+type Resources struct {}
+
+
+func Run() {
 	cli, err := client.NewClientWithOpts(client.WithHost("tcp://127.0.0.1:2375"))
 	if err != nil {
 		panic(err)
@@ -26,11 +69,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	writer, err := io.Copy(os.Stdout,reader)
+	_, err = io.Copy(os.Stdout,reader)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(writer)
 	// create container
 	// portMap
 	portMap := make(map[nat.Port][]nat.PortBinding)
@@ -46,7 +88,7 @@ func main() {
 		Image:    "gocloudcoder/kube-image-pull:develop",
 	}, &container.HostConfig{
 		PortBindings: portMap,
-	}, nil, nil, "ha"+uuid.Generate().String()[:8])
+	}, nil, nil, generateRandomHostname())
 	if err != nil {
 		panic(err)
 	}
@@ -56,4 +98,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+// machine uuid
+func generateRandomHostname() string {
+	// 加入随机种子
+	rand.Seed(time.Now().UnixNano())
+	t := fmt.Sprintf("%d", time.Now().UnixNano())
+	f := func() int64 { return rand.Int63n(9999-1000) + 1000 }
+	return fmt.Sprintf("docker-%s-%d-%d", t[len(t)-4:], f(), f())
 }
