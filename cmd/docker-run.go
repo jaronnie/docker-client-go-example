@@ -45,15 +45,15 @@ ports:
     protocol: tcp  
 `
 
-type Config struct {
-	Resources
+//type Config struct {
+//	Resources
+//
+//	Name string
+//	Image string
+//
+//}
 
-	Name string
-	Image string
-
-}
-
-type Resources struct {}
+//type Resources struct {}
 
 
 func Run() {
@@ -86,8 +86,15 @@ func Run() {
 	createResp, err := cli.ContainerCreate(ctx, &container.Config{
 		Hostname: "blocface-hostagent",
 		Image:    "gocloudcoder/kube-image-pull:develop",
+		// set env
+		Env: []string{"machineID=1"},
 	}, &container.HostConfig{
+		// bind port
 		PortBindings: portMap,
+		// limit cpu and memory
+		Resources: container.Resources{
+			Memory: 104857600, // 100M
+		},
 	}, nil, nil, generateRandomHostname())
 	if err != nil {
 		panic(err)
