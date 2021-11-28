@@ -9,7 +9,7 @@ import (
 )
 
 func Ps() {
-	cli, err := client.NewClientWithOpts(client.WithHost("tcp://127.0.0.1:2375"))
+	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		panic(err)
 	}

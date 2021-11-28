@@ -74,7 +74,7 @@ type Port struct {
 
 func Run() {
 	// generate client
-	cli, err := client.NewClientWithOpts(client.WithHost("tcp://127.0.0.1:2375"))
+	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		panic(err)
 	}
@@ -114,6 +114,8 @@ func Run() {
 		// set env
 		Env: envs,
 	}, &container.HostConfig{
+		// bind volume
+		Binds: []string{"/var/run/docker.sock:/var/run/docker.sock"},
 		// bind port
 		PortBindings: bindings,
 		// limit cpu and memory
