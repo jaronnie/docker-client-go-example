@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/docker/distribution/uuid"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"math/rand"
@@ -100,7 +102,15 @@ func Run() {
 	if err != nil {
 		panic(err)
 	}
+	// create network default bridge
+	networkName := "network"+uuid.Generate().String()
+	_, err = cli.NetworkCreate(ctx, networkName, types.NetworkCreate{
+		CheckDuplicate: true,
+	})
 
+	if err != nil {
+		panic(err)
+	}
 	// generate envs
 	envs := SetEnv(config.Envs)
 
@@ -122,7 +132,7 @@ func Run() {
 		Resources: container.Resources{
 			Memory: 104857600, // 100M
 		},
-	}, nil, nil, generateRandomHostname())
+	}, &network.NetworkingConfig{EndpointsConfig: GenerateNetworkConfig(networkName)}, nil, generateRandomHostname())
 	if err != nil {
 		panic(err)
 	}
@@ -163,4 +173,10 @@ func SetPortBindings(ports []Port) map[nat.Port][]nat.PortBinding {
 		}
 	}
 	return portMap
+}
+
+func GenerateNetworkConfig(networkName string) map[string]*network.EndpointSettings {
+	configs := make(map[string]*network.EndpointSettings)
+	configs[networkName] = &network.EndpointSettings{}
+	return configs
 }
